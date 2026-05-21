@@ -11,7 +11,7 @@ Tested on Alpine Linux 3.20.5 running kernel 6.6.69.
 The compressed blob contains the byte string `root::0:0:` which patches the 'x' out of the original entry for root (`root:x:0:0:root:/root:/bin/sh`), bypassing the check for a password in /etc/shadow when su is called.
 
 References:
-https://security.alpinelinux.org/vuln/CVE-2026-31431
-https://github.com/theori-io/copy-fail-CVE-2026-31431
+[](https://security.alpinelinux.org/vuln/CVE-2026-31431)
+[](https://github.com/theori-io/copy-fail-CVE-2026-31431)
 
 
