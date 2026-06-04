@@ -8,9 +8,11 @@ go build -o exp main.go
 ./exp
 ```
 
+![](demo_go.png)
+
 Or simply run the python script as an unprivileged user using `python3 exp.py` and enjoy your root shell.
 
-![](demo1.gif)
+![](demo_python.gif)
 
 
 Tested on Alpine Linux 3.20.5 running kernel 6.6.69.

